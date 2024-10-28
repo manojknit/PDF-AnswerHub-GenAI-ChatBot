@@ -1,3 +1,159 @@
+**Building an AI-Powered PDF Question-Answering Chatbot Using FAISS, LangChain, and Streamlit**
+
+In today’s AI-driven world, one exciting application is a chatbot capable of answering questions based on the content of uploaded PDF documents. This type of chatbot can be used in various industries—legal, educational, and business—where quick retrieval of information from large documents is essential.
+
+In this article, we’ll walk through the creation of a question-answering chatbot using FAISS for efficient search, LangChain for embedding and language model interactions, Streamlit for an interactive interface, and PyPDF2 for PDF handling. The chatbot will allow users to upload a PDF document, ask questions about its content, and retrieve accurate answers.
+
+### Key Libraries and Technologies
+
+- **FAISS**: Facebook’s AI Similarity Search (FAISS) is a library designed for efficient similarity search and clustering of dense vectors, which is perfect for large-scale search tasks.
+- **LangChain**: An open-source library for building language model-driven applications, LangChain simplifies the handling of embeddings, chains, and interactions with language models.
+- **Streamlit**: An open-source Python library that lets you build interactive web applications quickly.
+- **PyPDF2**: A Python library for extracting text from PDF files.
+
+### Prerequisites
+
+Before we dive into the code, ensure you have the following libraries installed:
+
+```bash
+pip install PyPDF2 streamlit langchain faiss-cpu langchain_openai python-dotenv
+```
+
+We’ll also need an OpenAI API key for generating embeddings and performing text processing, which we’ll keep secure by storing it in a `.env` file.
+
+### Step 1: Set Up Project Files
+
+1. **Create a `.env` File**: This file will store the OpenAI API key securely, which we’ll load in our code without exposing it in version control.
+
+   ```plaintext
+   OPENAI_API_KEY=your_openai_api_key
+   ```
+
+   Don’t forget to add `.env` to your `.gitignore` file to avoid committing sensitive information to your repository.
+
+2. **Create the main Python file**: We’ll name this `pdf_chatbot.py` and write our code here.
+
+### Step 2: Code Walkthrough
+
+Here’s the complete code with explanations:
+
+```python
+import os
+import PyPDF2
+import streamlit as st
+from dotenv import load_dotenv
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_openai import OpenAIEmbeddings
+from langchain.vectorstores import FAISS
+from langchain.chains.question_answering import load_qa_chain
+from langchain_community.chat_models import ChatOpenAI
+
+# Load environment variables from .env file
+load_dotenv()
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+# Path to save/load FAISS index
+FAISS_INDEX_PATH = "faiss_index"
+
+# Initialize embeddings
+embeddings = OpenAIEmbeddings(model="text-embedding-3-large", api_key=OPENAI_API_KEY)
+
+# Initialize Streamlit app
+st.header("AI-Powered PDF Q&A Chatbot")
+with st.sidebar:
+    st.title("Upload Your Document")
+    file = st.file_uploader("Upload a PDF file to start asking questions", type="pdf")
+
+# Function to extract text from PDF
+def extract_text_from_pdf(file):
+    reader = PyPDF2.PdfReader(file)
+    text = ""
+    for page_num in range(len(reader.pages)):
+        page = reader.pages[page_num]
+        text += page.extract_text()
+    return text
+
+# Check if FAISS index exists
+vector_store = None
+if os.path.exists(FAISS_INDEX_PATH):
+    # Load the existing FAISS index
+    vector_store = FAISS.load_local(FAISS_INDEX_PATH, embeddings, allow_dangerous_deserialization=True)
+    st.write("Loaded existing FAISS index.")
+
+# Process uploaded PDF
+if file:
+    text = extract_text_from_pdf(file)
+    splitter = RecursiveCharacterTextSplitter(
+        separators="\n",
+        chunk_size=1000,
+        chunk_overlap=200,
+        length_function=len
+    )
+    chunks = splitter.split_text(text)
+    st.write(f"Total chunks created: {len(chunks)}")
+
+    # Create new FAISS index if not already loaded
+    if vector_store is None:
+        vector_store = FAISS.from_texts(chunks, embeddings)
+        vector_store.save_local(FAISS_INDEX_PATH)
+        st.write("Created and saved new FAISS index with uploaded PDF.")
+
+# Allow question input if vector store is available
+if vector_store is not None:
+    question = st.text_input("Ask a question")
+
+    # Perform similarity search when user asks a question
+    if question:
+        question_embedding = embeddings.embed_query(question)
+        match = vector_store.similarity_search_by_vector(question_embedding)
+
+        llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY, temperature=0, max_tokens=1000, model="gpt-3.5-turbo")
+        qa_chain = load_qa_chain(llm, chain_type="stuff")
+        answer = qa_chain.run(input_documents=match, question=question)
+        st.write(answer)
+else:
+    st.write("Please upload a PDF to create or load the FAISS index.")
+```
+
+### Explanation of the Code
+
+1. **Environment Setup**: We load the OpenAI API key from the `.env` file for embedding generation.
+
+2. **Uploading and Reading the PDF**: 
+   - Users can upload a PDF file, which will be processed with `PyPDF2` to extract text.
+   - The extracted text is then split into manageable chunks using `RecursiveCharacterTextSplitter`.
+
+3. **Embedding and FAISS Index**:
+   - For a new PDF upload, embeddings are generated using `OpenAIEmbeddings` from LangChain, and a FAISS index is created and saved.
+   - If the FAISS index file already exists, it is loaded, allowing users to ask questions even if they don’t upload a new document.
+
+4. **Question Input and Search**:
+   - Users can ask questions related to the uploaded PDF, which are converted into embeddings and queried against the FAISS index.
+   - The top matches are retrieved and fed into the language model for answering, with responses displayed in Streamlit.
+
+### Key Features
+
+- **Persistent Storage**: The FAISS index is saved locally, allowing the chatbot to retrieve answers even across different sessions.
+- **Secure API Key Management**: With `dotenv`, sensitive information like API keys is kept secure.
+- **Streamlit Interface**: Streamlit’s user-friendly interface makes it easy for non-technical users to interact with the chatbot.
+
+### Running the Chatbot
+
+To run the chatbot, use:
+
+```bash
+streamlit run pdf_chatbot.py
+```
+
+This command will open a local web server where you can upload a PDF, ask questions, and see the answers based on the document’s content.
+
+### Conclusion
+
+This AI-powered PDF Q&A chatbot demonstrates how FAISS and LangChain can be combined with Streamlit to create a useful tool for information retrieval. It’s scalable, secure, and perfect for handling large documents with ease, making it a valuable asset for any organization that deals with significant amounts of text data. 
+
+Explore further by adding features like support for multiple file formats, conversational memory, or multi-document querying to make your chatbot even more robust.
+
+## How To Run
 Creating a `requirements.txt` file in VS Code for a Python project is straightforward. Here's a step-by-step guide:
 
 1. **Open Your Project in VS Code**:
