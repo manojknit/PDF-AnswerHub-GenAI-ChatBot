@@ -28,6 +28,13 @@ That’s it! You’ve created and verified your `requirements.txt` file. This fi
 pip3 install -r requirements.txt
 ```
 
+7. **Create a `.env` File**:
+   Add the API key in a `.env` file (e.g., named `.env`), which will not be committed to Git. Inside `.env`, add the following line:
+
+   ```
+   OPENAI_API_KEY=sk-proj-byLvK-Dummy-gA
+   ```
+
 # Chat Bot
 1. install
 ```
