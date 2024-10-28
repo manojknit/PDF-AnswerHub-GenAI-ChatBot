@@ -191,22 +191,10 @@ pip3 install -r requirements.txt
    OPENAI_API_KEY=sk-proj-byLvK-Dummy-gA
    ```
 
-# Chat Bot
-1. install
-```
-pip3 install streamlit pypdf2 langchain faiss-cpu langchain_community langchain_openai python-dotenv
-```
-streamlit: UI for Chatbot app. upload PDF
-pypdf2: PDF file reader
-langchain:
-faiss-cpu: 
-
-2. add code
-3. run
+8. **Run**:
 ```
 python3 chatbot.py
 streamlit run chatbot.py
 ```
-
-# Process
+Process
 PDF Source -> Chunks -> Embeddings(openAI) -> Vector Store(faiss/vectordb/pinedb) -> ranked results
