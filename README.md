@@ -5,7 +5,7 @@ In today’s AI-driven world, one exciting application is a chatbot capable of a
 In this article, we’ll walk through the creation of a question-answering chatbot using FAISS for efficient search, LangChain for embedding and language model interactions, Streamlit for an interactive interface, and PyPDF2 for PDF handling. The chatbot will allow users to upload a PDF document, ask questions about its content, and retrieve accurate answers.
 
 ### Architecture
-<img src="./img/model.png" height="250" width="450" >
+<img src="./img/model.png" height="1700" width="2400" >
 
 ### Key Libraries and Technologies
 
