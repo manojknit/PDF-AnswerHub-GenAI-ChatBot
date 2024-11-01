@@ -19,7 +19,7 @@ FAISS_INDEX_PATH = "faiss_index"
 embeddings = OpenAIEmbeddings(model="text-embedding-3-large", api_key=OPENAI_API_KEY)
 
 # Initialize Streamlit app
-st.header("My first Chatbot")
+st.header("Retrieval-Augmented Generation (RAG) based AI-Powered PDF Question-Answering Chatbot")
 with st.sidebar:
     st.title("Your Documents")
     file = st.file_uploader("Upload a PDF file and start asking questions", type="pdf")
