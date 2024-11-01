@@ -1,4 +1,4 @@
-**Building an Retrieval-Augmented Generation (RAG) based AI-Powered PDF Question-Answering Chatbot Using FAISS, LangChain, and Streamlit**
+**Creating an AI-Powered PDF Question-Answering Chatbot with Retrieval-Augmented Generation (RAG) Using FAISS, LangChain, and Streamlit**
 
 In today’s AI-driven world, one exciting application is a chatbot capable of answering questions based on the content of uploaded PDF documents. This type of chatbot can be used in various industries—legal, educational, and business—where quick retrieval of information from large documents is essential.
 
