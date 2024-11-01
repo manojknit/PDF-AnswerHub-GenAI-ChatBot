@@ -62,10 +62,10 @@ FAISS_INDEX_PATH = "faiss_index"
 embeddings = OpenAIEmbeddings(model="text-embedding-3-large", api_key=OPENAI_API_KEY)
 
 # Initialize Streamlit app
-st.header("AI-Powered PDF Q&A Chatbot")
+st.header("Retrieval-Augmented Generation (RAG) based AI-Powered PDF Question-Answering Chatbot")
 with st.sidebar:
-    st.title("Upload Your Document")
-    file = st.file_uploader("Upload a PDF file to start asking questions", type="pdf")
+    st.title("Your Documents")
+    file = st.file_uploader("Upload a PDF file and start asking questions", type="pdf")
 
 # Function to extract text from PDF
 def extract_text_from_pdf(file):
@@ -93,6 +93,7 @@ if file:
         length_function=len
     )
     chunks = splitter.split_text(text)
+    st.write(chunks)
     st.write(f"Total chunks created: {len(chunks)}")
 
     # Create new FAISS index if not already loaded
@@ -116,6 +117,7 @@ if vector_store is not None:
         st.write(answer)
 else:
     st.write("Please upload a PDF to create or load the FAISS index.")
+
 ```
 
 ### Explanation of the Code
